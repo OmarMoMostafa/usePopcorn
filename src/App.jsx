@@ -8,8 +8,15 @@ export const URL = "http://www.omdbapi.com/?apikey=" + API_KEY;
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
+  const [watched, setWatched] = useState(function () {
+    const storedValue = localStorage.getItem("watched");
+    return JSON.parse(storedValue);
+  });
   const [movieSelected, setMovieSelected] = useState(null);
+
+  // useEffect(function () {
+  //   setWatched(JSON.parse(localStorage.getItem("watched")));
+  // }, []);
 
   useEffect(
     function () {
@@ -21,6 +28,13 @@ export default function App() {
       searchMovie();
     },
     [query]
+  );
+
+  useEffect(
+    function () {
+      localStorage.setItem("watched", JSON.stringify(watched));
+    },
+    [watched]
   );
 
   return (
