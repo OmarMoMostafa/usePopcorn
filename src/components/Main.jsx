@@ -15,7 +15,7 @@ export function Box({ children }) {
 // FIXME: try to make setMovieSelected less digging
 export function ResList({ movies, setMovieSelected }) {
   return (
-    <ul className="list">
+    <ul className="list list-movies">
       {movies?.map((movie) => (
         <ResMovie
           setMovieSelected={setMovieSelected}
@@ -30,6 +30,7 @@ export function ResList({ movies, setMovieSelected }) {
 export function ResMovie({ movie, setMovieSelected }) {
   return (
     <li
+      className="result"
       onClick={() => {
         setMovieSelected(movie.imdbID);
       }}
@@ -46,22 +47,27 @@ export function ResMovie({ movie, setMovieSelected }) {
   );
 }
 
-export function WatchedList({ watched }) {
+export function WatchedList({ watched, setMovieSelected }) {
   return (
     <>
       <Summary watched={watched} />
 
-      <ul className="list">
-        {watched.map((movie) => (
-          <WatchedMovie key={movie.imdbID} movie={movie} />
-        ))}
+      <ul className="list list-movies">
+        {watched &&
+          watched.map((movie) => (
+            <WatchedMovie
+              setMovieSelected={setMovieSelected}
+              key={movie.imdbID}
+              movie={movie}
+            />
+          ))}
       </ul>
     </>
   );
 }
 
 const average = (arr) =>
-  arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
+  arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0).toFixed(2);
 
 export function Summary({ watched }) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
@@ -79,10 +85,11 @@ export function Summary({ watched }) {
           <span>⭐️</span>
           <span>{avgImdbRating}</span>
         </p>
-        <p>
+        {/* TODO: add user rating and calculate average */}
+        {/* <p>
           <span>🌟</span>
           <span>{avgUserRating}</span>
-        </p>
+        </p> */}
         <p>
           <span>⏳</span>
           <span>{avgRuntime} min</span>
@@ -92,9 +99,9 @@ export function Summary({ watched }) {
   );
 }
 
-export function WatchedMovie({ movie }) {
+export function WatchedMovie({ movie, setMovieSelected }) {
   return (
-    <li key={movie.imdbID}>
+    <li onClick={() => setMovieSelected(movie.imdbID)} key={movie.imdbID}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>
@@ -102,10 +109,10 @@ export function WatchedMovie({ movie }) {
           <span>⭐️</span>
           <span>{movie.imdbRating}</span>
         </p>
-        <p>
+        {/* <p>
           <span>🌟</span>
           <span>{movie.userRating}</span>
-        </p>
+        </p> */}
         <p>
           <span>⏳</span>
           <span>{movie.runtime} min</span>
@@ -115,21 +122,30 @@ export function WatchedMovie({ movie }) {
   );
 }
 
-export function MovieDetails({ id, setMovieSelected }) {
+export function MovieDetails({ id, setMovieSelected, watched, setWatched }) {
   const [movieDetails, setMovieDetails] = useState(null);
+
+  const isWatched = watched.map((movie) => movie.imdbID).includes(id);
 
   useEffect(
     function () {
       async function getMovieDetails() {
         const res = await fetch(URL + `&i=${id}`);
         const data = await res.json();
-        console.log(data);
         setMovieDetails(data);
       }
       getMovieDetails();
     },
     [id]
   );
+
+  function addBtnHandler() {
+    if (isWatched) {
+      setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
+    } else {
+      setWatched((watched) => [movieDetails, ...watched]);
+    }
+  }
 
   return (
     <div className="details">
@@ -157,6 +173,9 @@ export function MovieDetails({ id, setMovieSelected }) {
           </header>
 
           <section>
+            <button className="btn-add" onClick={addBtnHandler}>
+              {isWatched ? "- Remove from list" : "+ Add to list"}
+            </button>
             <p>
               <em>{movieDetails.Plot}</em>
             </p>
