@@ -72,7 +72,7 @@ const average = (arr) =>
 export function Summary({ watched }) {
   const avgImdbRating = average(watched.map((movie) => movie.imdbRating));
   const avgUserRating = average(watched.map((movie) => movie.userRating));
-  const avgRuntime = average(watched.map((movie) => movie.runtime));
+  const totlaRuntime = watched.reduce((acc, movie) => acc + movie.Runtime, 0);
   return (
     <div className="summary">
       <h2>Movies you watched</h2>
@@ -92,7 +92,7 @@ export function Summary({ watched }) {
         </p> */}
         <p>
           <span>⏳</span>
-          <span>{avgRuntime} min</span>
+          <span>{totlaRuntime} min</span>
         </p>
       </div>
     </div>
@@ -115,7 +115,7 @@ export function WatchedMovie({ movie, setMovieSelected }) {
         </p> */}
         <p>
           <span>⏳</span>
-          <span>{movie.runtime} min</span>
+          <span>{movie.Runtime} min</span>
         </p>
       </div>
     </li>
@@ -132,8 +132,10 @@ export function MovieDetails({ id, setMovieSelected, watched, setWatched }) {
       async function getMovieDetails() {
         const res = await fetch(URL + `&i=${id}`);
         const data = await res.json();
-        setMovieDetails(data);
+        const runtime = Number(data.Runtime.split(" ")[0]);
+        setMovieDetails({ ...data, Runtime: runtime });
       }
+
       getMovieDetails();
     },
     [id]
@@ -162,7 +164,7 @@ export function MovieDetails({ id, setMovieSelected, watched, setWatched }) {
             <div className="details-overview">
               <h2>{movieDetails.Title}</h2>
               <p>
-                {movieDetails.Released} &bull; {movieDetails.Runtime}
+                {movieDetails.Released} &bull; {movieDetails.Runtime} min
               </p>
               <p>{movieDetails.Genre}</p>
               <p>
