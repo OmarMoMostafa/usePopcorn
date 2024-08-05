@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { URL } from "../App";
 
 export function Box({ children }) {
   const [isOpen, setIsOpen] = useState(true);
@@ -11,20 +12,28 @@ export function Box({ children }) {
     </div>
   );
 }
-
-export function ResList({ movies }) {
+// FIXME: try to make setMovieSelected less digging
+export function ResList({ movies, setMovieSelected }) {
   return (
     <ul className="list">
       {movies?.map((movie) => (
-        <ResMovie movie={movie} key={movie.imdbID} />
+        <ResMovie
+          setMovieSelected={setMovieSelected}
+          movie={movie}
+          key={movie.imdbID}
+        />
       ))}
     </ul>
   );
 }
 
-export function ResMovie({ movie }) {
+export function ResMovie({ movie, setMovieSelected }) {
   return (
-    <li>
+    <li
+      onClick={() => {
+        setMovieSelected(movie.imdbID);
+      }}
+    >
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>
@@ -106,6 +115,56 @@ export function WatchedMovie({ movie }) {
   );
 }
 
-export function MovieDetails({ id }) {
-  return "hello";
+export function MovieDetails({ id, setMovieSelected }) {
+  const [movieDetails, setMovieDetails] = useState(null);
+
+  useEffect(
+    function () {
+      async function getMovieDetails() {
+        const res = await fetch(URL + `&i=${id}`);
+        const data = await res.json();
+        console.log(data);
+        setMovieDetails(data);
+      }
+      getMovieDetails();
+    },
+    [id]
+  );
+
+  return (
+    <div className="details">
+      {movieDetails ? (
+        <>
+          <header>
+            <button className="btn-back" onClick={() => setMovieSelected(null)}>
+              &larr;
+            </button>
+            <img
+              src={movieDetails.Poster}
+              alt={`Poster of ${movieDetails.Title} movie`}
+            />
+            <div className="details-overview">
+              <h2>{movieDetails.Title}</h2>
+              <p>
+                {movieDetails.Released} &bull; {movieDetails.Runtime}
+              </p>
+              <p>{movieDetails.Genre}</p>
+              <p>
+                <span>⭐️</span>
+                {movieDetails.ImdbRating} IMDb rating
+              </p>
+            </div>
+          </header>
+
+          <section>
+            <p>
+              <em>{movieDetails.Plot}</em>
+            </p>
+            <p>Starring {movieDetails.Actors}</p>
+            <p>Directed by {movieDetails.Director}</p>
+          </section>
+        </>
+      ) : null}
+    </div>
+  );
 }

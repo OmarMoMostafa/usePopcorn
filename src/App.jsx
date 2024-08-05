@@ -50,13 +50,14 @@ const tempWatchedData = [
 ];
 
 const API_KEY = "a8d7330b";
-const URL = "http://www.omdbapi.com/?apikey=" + API_KEY;
+export const URL = "http://www.omdbapi.com/?apikey=" + API_KEY;
 
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState(tempWatchedData);
   const [movieSelected, setMovieSelected] = useState(null);
+  // const [movieDetails, setMovieDetails] = useState(null);
 
   useEffect(
     function () {
@@ -70,6 +71,19 @@ export default function App() {
     [query]
   );
 
+  // useEffect(
+  //   function () {
+  //     async function getMovieDetails() {
+  //       const res = await fetch(URL + `&i=${movieSelected}`);
+  //       const data = await res.json();
+  //       console.log(data);
+  //       setMovieDetails(data);
+  //     }
+  //     getMovieDetails();
+  //   },
+  //   [movieSelected]
+  // );
+
   return (
     <>
       <nav className="nav-bar">
@@ -80,14 +94,16 @@ export default function App() {
 
       <main className="main">
         <Box>
-          <ResList movies={movies} />
+          <ResList setMovieSelected={setMovieSelected} movies={movies} />
         </Box>
         <Box>
-          {/* FIXME: show datails only if there is a selected movie */}
           {movieSelected ? (
-            <WatchedList watched={watched} />
+            <MovieDetails
+              setMovieSelected={setMovieSelected}
+              id={movieSelected}
+            />
           ) : (
-            <MovieDetails id={movieSelected} />
+            <WatchedList watched={watched} />
           )}
         </Box>
       </main>
