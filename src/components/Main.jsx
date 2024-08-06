@@ -13,16 +13,20 @@ export function Box({ children }) {
   );
 }
 // FIXME: try to make setMovieSelected less digging
-export function ResList({ movies, setMovieSelected }) {
+export function ResList({ movies, setMovieSelected, isLoading }) {
   return (
     <ul className="list list-movies">
-      {movies?.map((movie) => (
-        <ResMovie
-          setMovieSelected={setMovieSelected}
-          movie={movie}
-          key={movie.imdbID}
-        />
-      ))}
+      {isLoading ? (
+        <Loader />
+      ) : (
+        movies?.map((movie) => (
+          <ResMovie
+            setMovieSelected={setMovieSelected}
+            movie={movie}
+            key={movie.imdbID}
+          />
+        ))
+      )}
     </ul>
   );
 }
@@ -124,16 +128,24 @@ export function WatchedMovie({ movie, setMovieSelected }) {
 
 export function MovieDetails({ id, setMovieSelected, watched, setWatched }) {
   const [movieDetails, setMovieDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isWatched = watched.map((movie) => movie.imdbID).includes(id);
 
   useEffect(
     function () {
       async function getMovieDetails() {
-        const res = await fetch(URL + `&i=${id}`);
-        const data = await res.json();
-        const runtime = Number(data.Runtime.split(" ")[0]);
-        setMovieDetails({ ...data, Runtime: runtime });
+        try {
+          setIsLoading(true);
+          const res = await fetch(URL + `&i=${id}`);
+          const data = await res.json();
+          const runtime = Number(data.Runtime.split(" ")[0]);
+          setMovieDetails({ ...data, Runtime: runtime });
+        } catch (e) {
+          console.log(e);
+        } finally {
+          setIsLoading(false);
+        }
       }
 
       getMovieDetails();
@@ -151,41 +163,52 @@ export function MovieDetails({ id, setMovieSelected, watched, setWatched }) {
 
   return (
     <div className="details">
-      {movieDetails ? (
-        <>
-          <header>
-            <button className="btn-back" onClick={() => setMovieSelected(null)}>
-              &larr;
-            </button>
-            <img
-              src={movieDetails.Poster}
-              alt={`Poster of ${movieDetails.Title} movie`}
-            />
-            <div className="details-overview">
-              <h2>{movieDetails.Title}</h2>
-              <p>
-                {movieDetails.Released} &bull; {movieDetails.Runtime} min
-              </p>
-              <p>{movieDetails.Genre}</p>
-              <p>
-                <span>⭐️</span>
-                {movieDetails.ImdbRating} IMDb rating
-              </p>
-            </div>
-          </header>
+      {isLoading ? (
+        <Loader />
+      ) : (
+        movieDetails && (
+          <>
+            <header>
+              <button
+                className="btn-back"
+                onClick={() => setMovieSelected(null)}
+              >
+                &larr;
+              </button>
+              <img
+                src={movieDetails.Poster}
+                alt={`Poster of ${movieDetails.Title} movie`}
+              />
+              <div className="details-overview">
+                <h2>{movieDetails.Title}</h2>
+                <p>
+                  {movieDetails.Released} &bull; {movieDetails.Runtime} min
+                </p>
+                <p>{movieDetails.Genre}</p>
+                <p>
+                  <span>⭐️</span>
+                  {movieDetails.ImdbRating} IMDb rating
+                </p>
+              </div>
+            </header>
 
-          <section>
-            <button className="btn-add" onClick={addBtnHandler}>
-              {isWatched ? "- Remove from list" : "+ Add to list"}
-            </button>
-            <p>
-              <em>{movieDetails.Plot}</em>
-            </p>
-            <p>Starring {movieDetails.Actors}</p>
-            <p>Directed by {movieDetails.Director}</p>
-          </section>
-        </>
-      ) : null}
+            <section>
+              <button className="btn-add" onClick={addBtnHandler}>
+                {isWatched ? "- Remove from list" : "+ Add to list"}
+              </button>
+              <p>
+                <em>{movieDetails.Plot}</em>
+              </p>
+              <p>Starring {movieDetails.Actors}</p>
+              <p>Directed by {movieDetails.Director}</p>
+            </section>
+          </>
+        )
+      )}
     </div>
   );
+}
+
+export function Loader() {
+  return <h2 className="loading">Loading ...</h2>;
 }

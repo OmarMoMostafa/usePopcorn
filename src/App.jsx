@@ -13,18 +13,23 @@ export default function App() {
     return JSON.parse(storedValue);
   });
   const [movieSelected, setMovieSelected] = useState(null);
-
-  // useEffect(function () {
-  //   setWatched(JSON.parse(localStorage.getItem("watched")));
-  // }, []);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(
     function () {
       async function searchMovie() {
-        const res = await fetch(URL + `&s=${query}`);
-        const data = await res.json();
-        setMovies(data.Search);
+        try {
+          setIsLoading(true);
+          const res = await fetch(URL + `&s=${query}`);
+          const data = await res.json();
+          setMovies(data.Search);
+        } catch (e) {
+          console.log(e);
+        } finally {
+          setIsLoading(false);
+        }
       }
+
       searchMovie();
     },
     [query]
@@ -47,7 +52,11 @@ export default function App() {
 
       <main className="main">
         <Box>
-          <ResList setMovieSelected={setMovieSelected} movies={movies} />
+          <ResList
+            isLoading={isLoading}
+            setMovieSelected={setMovieSelected}
+            movies={movies}
+          />
         </Box>
         <Box>
           {movieSelected ? (
