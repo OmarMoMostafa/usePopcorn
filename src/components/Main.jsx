@@ -153,6 +153,18 @@ export function MovieDetails({ id, setMovieSelected, watched, setWatched }) {
     [id]
   );
 
+  useEffect(
+    function () {
+      if (!movieDetails?.Title) return;
+      document.title = "Movie | " + movieDetails?.Title;
+
+      return function () {
+        document.title = "usePopcorn";
+      };
+    },
+    [movieDetails]
+  );
+
   function addBtnHandler() {
     if (isWatched) {
       setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
