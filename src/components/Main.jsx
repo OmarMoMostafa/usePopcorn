@@ -153,6 +153,7 @@ export function MovieDetails({ id, setMovieSelected, watched, setWatched }) {
     [id]
   );
 
+  // changing page title according to selected movie
   useEffect(
     function () {
       if (!movieDetails?.Title) return;
@@ -199,7 +200,7 @@ export function MovieDetails({ id, setMovieSelected, watched, setWatched }) {
                 <p>{movieDetails.Genre}</p>
                 <p>
                   <span>⭐️</span>
-                  {movieDetails.ImdbRating} IMDb rating
+                  {movieDetails.imdbRating} IMDb rating
                 </p>
               </div>
             </header>

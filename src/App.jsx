@@ -42,6 +42,14 @@ export default function App() {
     [watched]
   );
 
+  useEffect(function () {
+    document.addEventListener("keydown", (e) => {
+      if (e.code === "Escape") {
+        setMovieSelected(null);
+      }
+    });
+  }, []);
+
   return (
     <>
       <nav className="nav-bar">
