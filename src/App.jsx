@@ -1,5 +1,8 @@
-import { Box, MovieDetails, ResList, WatchedList } from "./components/Main";
 import { Logo, Search, Result } from "./components/Nav";
+import { Box } from "./components/Main";
+import { ResList } from "./components/ResultList";
+import { WatchedList } from "./components/WatchedList";
+import { MovieDetails } from "./components/MovieDetails";
 import { useEffect, useState } from "react";
 
 const API_KEY = "a8d7330b";
